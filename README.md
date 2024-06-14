@@ -1,7 +1,5 @@
-praktikum6
 
-
-# Praktikum7 <img src=https://logos-download.com/wp-content/uploads/2016/05/MySQL_logo_logotype.png width="130px" >
+# Praktikum6 <img src=https://logos-download.com/wp-content/uploads/2016/05/MySQL_logo_logotype.png width="130px" >
 ```
 NIM     : 312310576
 NAMA    : TAUFIK HIDAYAT
@@ -11,229 +9,132 @@ DOSEN   : Agung Nugroho, S.Kom., M.Kom.
 ```
 
 
-![gambar_tugas](screenshot/Soal%20Tabel.png)
 
-***Query MySQL Pada Tabel Perusahaan***
+# ERD KARYAWAN
+Berikut adalah representasi Entity Relationship Diagram (ERD) berdasarkan deskripsi yang Anda berikan:
 
 ```
-CREATE TABLE Perusahaan(
-id_p VARCHAR(10) PRIMARY KEY,
-nama VARCHAR(45) NOT NULL,
-alamat VARCHAR(45) DEFAULT NULL
+                 +----------------+
+                 |    Departemen  |
+                 +----------------+
+                 | id (PK)        |
+                 | nama_departemen|
+                 +----------------+
+                        |       ^
+                        |       |
+         +--------------+       +--------------+
+         |                                     |
+         |                                     |
++----------------+                  +-----------------+
+|    Karyawan    |                  |    Proyek       |
++----------------+                  +-----------------+
+| id (PK)        |                  | id (PK)         |
+| nama_karyawan  |                  | nama_proyek     |
+| departemen_id  |------------------| departemen_id   |
+| manager_id     |                  +-----------------+
++----------------+
+       |  ^
+       |  |
+       |  |
++--------------+
+|   Supervisor |
++--------------+
+| id (PK)      |
+| departemen_id|
+| karyawan_id  |
++--------------+
+```
+
+Pada ERD di atas, terdapat empat entitas utama yaitu "Departemen", "Karyawan", "Proyek", dan "Supervisor". Relasi antara entitas-entitas tersebut dijelaskan sebagai berikut:
+
+1. Tabel "Karyawan" memiliki relasi many-to-one dengan tabel "Departemen". Hal ini ditunjukkan oleh atribut "departemen_id" di tabel "Karyawan" yang mengacu pada atribut "id" di tabel "Departemen".
+2. Tabel "Karyawan" juga memiliki relasi many-to-one dengan tabel "Karyawan" (alias "Manager"). Ini ditunjukkan oleh atribut "manager_id" di tabel "Karyawan" yang mengacu pada atribut "id" di tabel "Karyawan" itu sendiri.
+3. Tabel "Proyek" memiliki relasi many-to-one dengan tabel "Departemen". Hal ini ditunjukkan oleh atribut "departemen_id" di tabel "Proyek" yang mengacu pada atribut "id" di tabel "Departemen".
+4. Terdapat tabel many-to-many "Karyawan_Proyek" yang menghubungkan karyawan dengan proyek yang sedang dikerjakan atau pernah dikerjakan. Tabel ini menghubungkan antara atribut "id" dari tabel "Karyawan" dan atribut "id" dari tabel "Proyek".
+5. Tabel "Supervisor" memiliki relasi many-to-one dengan tabel "Departemen" dan tabel "Karyawan". Hal ini ditunjukkan oleh atribut "departemen_id" di tabel "Supervisor" yang mengacu pada atribut "id" di tabel "Departemen", serta atribut "karyawan_id" di tabel "Supervisor" yang mengacu pada atribut "id" di tabel "Karyawan".
+
+ERD tersebut memberikan gambaran visual mengenai hubungan antara entitas-entitas dalam basis data yang Anda deskripsikan.
+
+
+# MEMBUAT TABEL 
+```SQL
+-- Membuat tabel Departemen
+CREATE TABLE Departemen (
+  id INT PRIMARY KEY,
+  nama_departemen VARCHAR(255)
 );
 
-INSERT INTO Perusahaan VALUES
-('P01', 'Kantor Pusat', NULL),
-('P02', 'Cabang Bekasi', NULL);
-SELECT * FROM Perusahaan;
-```
-
-***Output :***
-
-![gambar_ss1](screenshot/ss1.png)
-
-***Query MySQL Pada Tabel Departemen***
-
-```
-CREATE TABLE Departemen(
-id_dept VARCHAR(10) PRIMARY KEY,
-nama VARCHAR(45) NOT NULL,
-id_p VARCHAR(10) NOT NULL,
-manajer_nik VARCHAR(10) DEFAULT NULL
+-- Membuat tabel Karyawan
+CREATE TABLE Karyawan (
+  id INT PRIMARY KEY,
+  nama_karyawan VARCHAR(255),
+  departemen_id INT,
+  manager_id INT,
+  FOREIGN KEY (departemen_id) REFERENCES Departemen(id),
+  FOREIGN KEY (manager_id) REFERENCES Karyawan(id)
 );
 
-INSERT INTO Departemen VALUES
-('D01', 'Produksi', 'P02', 'N01'),
-('D02', 'Marketing', 'P01', 'N03'),
-('D03', 'RnD', 'P02', NULL),
-('D04', 'Logistik', 'P02', NULL);
-SELECT * FROM Departemen;
-```
-
-***Output :***
-
-![gambar_ss2](screenshot/ss2.png)
-
-***Query MySQL Pada Tabel Karyawan***
-
-```
-CREATE TABLE Karyawan(
-nik VARCHAR(10) PRIMARY KEY,
-nama VARCHAR(45) NOT NULL,
-id_dept VARCHAR(10) NOT NULL,
-sup_nik VARCHAR(10) DEFAULT NULL
+-- Membuat tabel Proyek
+CREATE TABLE Proyek (
+  id INT PRIMARY KEY,
+  nama_proyek VARCHAR(255),
+  departemen_id INT,
+  FOREIGN KEY (departemen_id) REFERENCES Departemen(id)
 );
 
-INSERT INTO Karyawan VALUES
-('N01', 'Ari', 'D01', NULL),
-('N02', 'Dina', 'D01', NULL),
-('N03', 'Rika', 'D03', NULL),
-('N04', 'Ratih', 'D01', 'N01'),
-('N05', 'Riko', 'D01', 'N01'),
-('N06', 'Dani', 'D02', NULL),
-('N07', 'Anis', 'D02', 'N06'),
-('N08', 'Dika', 'D02', 'N06');
-SELECT * FROM Karyawan;
-```
-
-***Output :***
-
-![gambar_ss3](screenshot/ss3.png)
-
-***Query MySQL Pada Tabel Project***
-
-```
-CREATE TABLE Project(
-id_proj VARCHAR(10) PRIMARY KEY,
-nama VARCHAR(45) NOT NULL,
-tgl_mulai DATETIME,
-tgl_selesai DATETIME,
-status TINYINT(1)
+-- Membuat tabel Many-to-Many Karyawan_Proyek
+CREATE TABLE Karyawan_Proyek (
+  karyawan_id INT,
+  proyek_id INT,
+  PRIMARY KEY (karyawan_id, proyek_id),
+  FOREIGN KEY (karyawan_id) REFERENCES Karyawan(id),
+  FOREIGN KEY (proyek_id) REFERENCES Proyek(id)
 );
 
-INSERT INTO Project VALUES
-('PJ01', 'A', '2019-01-10', '2019-03-10', '1'),
-('PJ02', 'B', '2019-02-15', '2019-04-10', '1'),
-('PJ03', 'C', '2019-03-21', '2019-05-10', '1');
-SELECT * FROM Project;
-```
-
-***Output :***
-
-![gambar_ss4](screenshot/ss4.png)
-
-***Query MySQL Pada Tabel Project Deatil***
-
-```
-CREATE TABLE Project_detail(
-id_proj VARCHAR(10) NOT NULL,
-nik VARCHAR(10) NOT NULL
+-- Membuat tabel Supervisor
+CREATE TABLE Supervisor (
+  id INT PRIMARY KEY,
+  departemen_id INT,
+  karyawan_id INT,
+  FOREIGN KEY (departemen_id) REFERENCES Departemen(id),
+  FOREIGN KEY (karyawan_id) REFERENCES Karyawan(id)
 );
-
-INSERT INTO Project_detail VALUES
-('PJ01', 'N01'),
-('PJ01', 'N02'),
-('PJ01', 'N03'),
-('PJ01', 'N04'),
-('PJ01', 'N05'),
-('PJ01', 'N07'),
-('PJ01', 'N08'),
-('PJ02', 'N01'),
-('PJ02', 'N03'),
-('PJ02', 'N05'),
-('PJ03', 'N03'),
-('PJ03', 'N07'),
-('PJ03', 'N08');
-SELECT * FROM Project_detail;
 ```
 
-***Output :***
 
-![gambar_ss5](screenshot/ss5.png)
-![gambar_ss5](screenshot/ss5-2.png)
+Setelah tabel-tabel terbuat, Anda dapat menggunakan perintah SQL untuk menghubungkan tabel-tabel tersebut. Berikut ini adalah contoh kode program untuk membuat hubungan antar tabel:
 
-## Menampilkan Nama Manajer Tiap Departemen
+1. Menambahkan karyawan ke departemen:
+```sql
+-- Contoh data pada tabel Departemen
+INSERT INTO Departemen (id, nama_departemen) VALUES (1, 'Departemen A');
+INSERT INTO Departemen (id, nama_departemen) VALUES (2, 'Departemen B');
 
+-- Contoh data pada tabel Karyawan
+INSERT INTO Karyawan (id, nama_karyawan, departemen_id, manager_id) VALUES (1, 'Karyawan A', 1, 2);
+INSERT INTO Karyawan (id, nama_karyawan, departemen_id, manager_id) VALUES (2, 'Karyawan B', 1, NULL);
+INSERT INTO Karyawan (id, nama_karyawan, departemen_id, manager_id) VALUES (3, 'Karyawan C', 2, NULL);
 ```
-Select Departemen.nama AS Departemen, Karyawan.nama AS Manajer
-FROM Departemen
-LEFT JOIN Karyawan ON Karyawan.nik = Departemen.manajer_nik;
+
+2. Menambahkan proyek ke departemen:
+```sql
+-- Contoh data pada tabel Proyek
+INSERT INTO Proyek (id, nama_proyek, departemen_id) VALUES (1, 'Proyek A', 1);
+INSERT INTO Proyek (id, nama_proyek, departemen_id) VALUES (2, 'Proyek B', 1);
+INSERT INTO Proyek (id, nama_proyek, departemen_id) VALUES (3, 'Proyek C', 2);
 ```
 
-***Output :***
+3. Menghubungkan karyawan dengan proyek pada tabel Many-to-Many Karyawan_Proyek:
+```sql
+-- Contoh data pada tabel Karyawan_Proyek
+INSERT INTO Karyawan_Proyek (karyawan_id, proyek_id) VALUES (1, 1);
+INSERT INTO Karyawan_Proyek (karyawan_id, proyek_id) VALUES (1, 2);
+INSERT INTO Karyawan_Proyek (karyawan_id, proyek_id) VALUES (2, 1);
+INSERT INTO Karyawan_Proyek (karyawan_id, pro
 
-![gambar_ss6](screenshot/ss6.png)
-
-## Menampilkan Nama Supervisor Tiap Karyawan
-
+yek_id) VALUES (3, 3);
 ```
-SELECT Karyawan.nik, Karyawan.nama, Departemen.nama AS Departemen, Supervisor.nama AS Supervisor
-FROM Karyawan
-LEFT JOIN Karyawan AS Supervisor ON Supervisor.nik = Karyawan.sup_nik
-LEFT JOIN Departemen ON Departemen.id_dept = Karyawan.id_dept;
-```
-***Output :***
 
-![gambar_ss7](screenshot/ss7.png)
-
-## Menampilkan Daftar Karyawan Yang Bekerja Pada Project A
-```
-SELECT Karyawan.nik, Karyawan.nama
-FROM Karyawan
-JOIN Project_detail ON Project_detail.nik = Karyawan.nik
-JOIN Project ON Project.id_proj = Project_detail.id_proj
-WHERE Project.nama = 'A';
-```
-***Output :***
-
-![gambar_ss8](screenshot/ss8.png)
-
-# Soal Latihan Praktikum
-
-## 1. Departemen Apa Saja Yang Terlibat Dalam Tiap-tiap Project.
-
-```
-SELECT Project.nama AS Project, GROUP_CONCAT(Departemen.nama) AS Departemen
-FROM Project
-INNER JOIN Project_detail ON Project.id_proj = Project_detail.id_proj
-INNER JOIN Karyawan ON Project_detail.nik = Karyawan.nik
-INNER JOIN Departemen ON Karyawan.id_dept = Departemen.id_dept
-GROUP BY Project.id_proj;
-```
-***Output :***
-
-![gambar_ss9](screenshot/ss9.png)
-
-## 2. Jumlah Karyawan Tiap Departemen Yang Bekerja Pada Tiap-tiap Project.
-
-```
-SELECT Project.nama AS Project, Departemen.nama AS Departemen, COUNT(*) AS 'Jumlah Karyawan'
-FROM Project
-INNER JOIN Project_detail ON Project.id_proj = Project_detail.id_proj
-INNER JOIN Karyawan ON Project_detail.nik = Karyawan.nik
-INNER JOIN Departemen ON Karyawan.id_dept = Departemen.id_dept
-GROUP BY Project.id_proj, Departemen.id_dept;
-```
-***Output :***
-
-![gambar_ss10](screenshot/ss10.png)
-
-## 3. Ada Berapa Project Yang Sedang Dikerjakan Oleh Departemen ***RnD***? (ket: project berjalan adalah yang statusnya 1).
-
-```
-SELECT COUNT(*) AS 'Jumlah Project'
-FROM Project
-INNER JOIN Project_detail ON Project.id_proj = Project_detail.id_proj
-INNER JOIN Karyawan ON Project_detail.nik = Karyawan.nik
-INNER JOIN Departemen ON Karyawan.id_dept = Departemen.id_dept
-WHERE Departemen.nama = 'RnD' AND Project.status = 1;
-```
-***Output :***
-
-![gambar_ss11](screenshot/ss11.png)
-
-## 4. Berapa banyak Project yang sedang dikerjakan oleh Ari ?
-
-```
-SELECT COUNT(*) AS 'Jumlah Project'
-FROM Project_detail
-INNER JOIN Karyawan ON Project_detail.nik = Karyawan.nik
-WHERE Karyawan.nama = 'Ari' AND Project_detail.id_proj IN (SELECT id_proj FROM Project WHERE status = 1);
-```
-***Output :***
-
-![gambar_ss12](screenshot/ss12.png)
-
-## 5. Siapa Saja Yang Mengerjakan Project B ?
-
-```
-SELECT Karyawan.nama
-FROM Project_detail
-INNER JOIN Karyawan ON Project_detail.nik = Karyawan.nik
-WHERE Project_detail.id_proj IN (SELECT id_proj FROM Project WHERE nama = 'B');
-```
-***Output :***
-
-![gambar_ss13](screenshot/ss13.png)
+Dengan menggunakan kode program di atas, Anda dapat membuat tabel-tabel dan menghubungkannya sesuai dengan deskripsi yang Anda berikan. Pastikan untuk menyesuaikan data yang ingin Anda masukkan ke dalam tabel sesuai kebutuhan Anda.
 
 ## SELESAI 
